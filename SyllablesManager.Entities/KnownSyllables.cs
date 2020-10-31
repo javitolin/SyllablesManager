@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
 namespace SyllablesManager.Entities
@@ -66,8 +67,19 @@ namespace SyllablesManager.Entities
 
         public string GetSyllablesForWord(string word)
         {
-            if (!_knownSyllablesDictionary.TryGetValue(word, out string numberOfSyllables))
-                return NotKnown;
+            var wordToCheck = word.Trim();
+            if (!_knownSyllablesDictionary.TryGetValue(wordToCheck, out string numberOfSyllables))
+            {
+                if (wordToCheck.Length == 2)
+                {
+                    _knownSyllablesDictionary.Add(wordToCheck, "1");
+                    return "1";
+                }
+                else
+                {
+                    return NotKnown;
+                }
+            }
 
             return numberOfSyllables;
         }

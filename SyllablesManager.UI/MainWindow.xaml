@@ -17,17 +17,19 @@
             </MenuItem>
         </Menu>
         <StackPanel Orientation="Vertical" DockPanel.Dock="Bottom">
-            <Grid MinHeight="350">
-                <ListView x:Name="LvFoundWords" ItemsSource="{Binding UnknownSyllablesWords}" ScrollViewer.VerticalScrollBarVisibility="Visible">
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="Auto">
-                                <TextBox x:Name="TxtSyllable" MinWidth="50" DockPanel.Dock="Left" Margin="10,0" Text="{Binding Syllables, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                                <TextBlock DockPanel.Dock="Right" Text="{Binding Word}"></TextBlock>
-                            </DockPanel>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+            <Grid>
+                <ScrollViewer MinHeight="250" MaxHeight="350">
+                    <ListView x:Name="LvFoundWords" ItemsSource="{Binding UnknownSyllablesWords}" >
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="Auto">
+                                    <TextBox x:Name="TxtSyllable" MinWidth="50" DockPanel.Dock="Left" Margin="10,0" Text="{Binding Syllables, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Word}"></TextBlock>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </ScrollViewer>
             </Grid>
             <Grid>
                 <TextBlock>

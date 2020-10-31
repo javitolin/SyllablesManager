@@ -23,9 +23,9 @@ namespace SyllablesManager.UI
         private ObservableCollection<FoundWordViewItem> _unknownSyllablesWords = new ObservableCollection<FoundWordViewItem>();
         private bool _knownSyllablesLoaded;
         private bool _wasSaved = false;
-        private string _syllablesCount;
+        private int _syllablesCount;
 
-        public string SyllablesCount
+        public int SyllablesCount
         {
             get => _syllablesCount;
             set
@@ -108,7 +108,8 @@ namespace SyllablesManager.UI
                 var syllables = _knownSyllables.GetSyllablesForWord(wordFromFile);
                 if (syllables != KnownSyllables.NotKnown)
                 {
-                    SyllablesCount += syllables;
+                    SyllablesCount += int.Parse(syllables);
+                    continue;
                 }
 
                 var foundWord = new FoundWordViewItem(wordFromFile, "" + syllables);
