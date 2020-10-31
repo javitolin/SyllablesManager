@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Syllables Calculator" Height="450" Width="800">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
@@ -17,9 +17,8 @@
             </MenuItem>
         </Menu>
         <StackPanel Orientation="Vertical" DockPanel.Dock="Bottom">
-            <Grid>
-                <ListView x:Name="LvFoundWords" ItemsSource="{Binding FoundWords, Mode=TwoWay}"
-                      ScrollViewer.VerticalScrollBarVisibility="Visible">
+            <Grid MinHeight="350">
+                <ListView x:Name="LvFoundWords" ItemsSource="{Binding UnknownSyllablesWords}" ScrollViewer.VerticalScrollBarVisibility="Visible">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="Auto">

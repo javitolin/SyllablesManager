@@ -20,7 +20,7 @@ namespace SyllablesManager.UI
         private const string Caption = "Syllables Helper";
         private KnownSyllables _knownSyllables;
         private readonly FileReader _fileReader = new FileReader();
-        private ObservableCollection<FoundWordViewItem> _foundWords = new ObservableCollection<FoundWordViewItem>();
+        private ObservableCollection<FoundWordViewItem> _unknownSyllablesWords = new ObservableCollection<FoundWordViewItem>();
         private bool _knownSyllablesLoaded;
         private bool _wasSaved = false;
         private string _syllablesCount;
@@ -36,13 +36,13 @@ namespace SyllablesManager.UI
             }
         }
 
-        public ObservableCollection<FoundWordViewItem> FoundWords
+        public ObservableCollection<FoundWordViewItem> UnknownSyllablesWords
         {
-            get => _foundWords;
+            get => _unknownSyllablesWords;
             set
             {
-                if (Equals(value, _foundWords)) return;
-                _foundWords = value;
+                if (Equals(value, _unknownSyllablesWords)) return;
+                _unknownSyllablesWords = value;
                 OnPropertyChanged();
             }
         }
@@ -94,11 +94,11 @@ namespace SyllablesManager.UI
             if (chosenFile == null)
                 return;
 
-            if (FoundWords.Count > 0)
+            if (UnknownSyllablesWords.Count > 0)
             {
                 var deleteLoadedFiles = MessageBox.Show("Delete loaded files?", Caption, MessageBoxButton.YesNo);
                 if (deleteLoadedFiles == MessageBoxResult.Yes)
-                    FoundWords.Clear();
+                    UnknownSyllablesWords.Clear();
             }
 
             var newWords = new List<FoundWordViewItem>();
@@ -110,13 +110,19 @@ namespace SyllablesManager.UI
                 {
                     SyllablesCount += syllables;
                 }
-                
-                newWords.Add(new FoundWordViewItem(wordFromFile, "" + syllables));
+
+                var foundWord = new FoundWordViewItem(wordFromFile, "" + syllables);
+                newWords.Add(foundWord);
             }
 
-            newWords.ForEach(FoundWords.Add);
+            if (newWords.Count == 0)
+            {
+                GetSyllablesCount_Click(sender, e);
+                return;
+            }
 
-            OnPropertyChanged(nameof(FoundWords));
+            newWords.ForEach(UnknownSyllablesWords.Add);
+            OnPropertyChanged(nameof(UnknownSyllablesWords));
         }
 
         private string? GetFileFromUser()
@@ -137,7 +143,7 @@ namespace SyllablesManager.UI
                 return;
             }
 
-            _knownSyllables.LoadNewSyllablesFromList(FoundWords.ToDictionary(f => f.Word, f => f.Syllables));
+            _knownSyllables.LoadNewSyllablesFromList(UnknownSyllablesWords.ToDictionary(f => f.Word, f => f.Syllables));
             _knownSyllables.SaveToFile();
             _wasSaved = true;
         }
@@ -150,19 +156,19 @@ namespace SyllablesManager.UI
                 return;
             }
 
-            if (FoundWords.Count == 0)
+            if (UnknownSyllablesWords.Count == 0)
             {
                 MessageBox.Show("Please load a text file first", Caption);
                 return;
             }
 
-            if (FoundWords.Any(f => f.Syllables == KnownSyllables.NotKnown))
+            if (UnknownSyllablesWords.Any(f => f.Syllables == KnownSyllables.NotKnown))
             {
                 MessageBox.Show("There are words without syllable number", Caption);
                 return;
             }
 
-            int totalSyllables = FoundWords.Sum(f => int.Parse(f.Syllables));
+            int totalSyllables = UnknownSyllablesWords.Sum(f => int.Parse(f.Syllables));
             SyllablesCount += totalSyllables;
             MessageBox.Show($"Total syllables: [{SyllablesCount}]");
         }
