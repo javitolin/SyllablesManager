@@ -6,13 +6,14 @@ namespace SyllablesManager.Entities
 {
     public class KnownSyllables
     {
-        private readonly Dictionary<string, int> _knownSyllablesDictionary;
+        private readonly Dictionary<string, string> _knownSyllablesDictionary;
         private readonly string _filename;
+        public const string NotKnown = "";
 
         public KnownSyllables(string filename)
         {
             _filename = filename;
-            _knownSyllablesDictionary = new Dictionary<string, int>();
+            _knownSyllablesDictionary = new Dictionary<string, string>();
         }
 
         public void ReadFromFile()
@@ -26,7 +27,7 @@ namespace SyllablesManager.Entities
             {
                 var currentLineSplit = line.Split(':');
                 var word = currentLineSplit[0].Trim();
-                var syllablesNumber = int.Parse(currentLineSplit[1].Trim());
+                var syllablesNumber = currentLineSplit[1].Trim();
                 if (!_knownSyllablesDictionary.ContainsKey(word))
                 {
                     _knownSyllablesDictionary.Add(word, syllablesNumber);
@@ -38,7 +39,7 @@ namespace SyllablesManager.Entities
             }
         }
 
-        public void LoadNewSyllablesFromList(Dictionary<string, int> newSyllables)
+        public void LoadNewSyllablesFromList(Dictionary<string, string> newSyllables)
         {
             foreach (var newSyllable in newSyllables)
             {
@@ -55,7 +56,7 @@ namespace SyllablesManager.Entities
         public void SaveToFile()
         {
             StringBuilder toFile = new StringBuilder();
-            foreach (KeyValuePair<string, int> keyValuePair in _knownSyllablesDictionary)
+            foreach (KeyValuePair<string, string> keyValuePair in _knownSyllablesDictionary)
             {
                 toFile.AppendLine($"{keyValuePair.Key}:{keyValuePair.Value}");
             }
@@ -63,10 +64,10 @@ namespace SyllablesManager.Entities
             File.WriteAllText(_filename, toFile.ToString());
         }
 
-        public int GetSyllablesForWord(string word)
+        public string GetSyllablesForWord(string word)
         {
-            if (!_knownSyllablesDictionary.TryGetValue(word, out int numberOfSyllables))
-                return -1;
+            if (!_knownSyllablesDictionary.TryGetValue(word, out string numberOfSyllables))
+                return NotKnown;
 
             return numberOfSyllables;
         }

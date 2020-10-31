@@ -1,0 +1,41 @@
+﻿<Window x:Class="SyllablesManager.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Load Known Syllables" Click="LoadKnowSyllablesBtn_Click" />
+                <MenuItem IsEnabled="{Binding KnownSyllablesLoaded}" Header="_Open Input Text" Click="LoadTextBtn_Click" />
+                <MenuItem IsEnabled="{Binding KnownSyllablesLoaded}" Header="_Calculate Syllables Count" Click="GetSyllablesCount_Click" />
+                <MenuItem IsEnabled="{Binding KnownSyllablesLoaded}" Header="_Save Known Syllables" Click="SaveLoaded_Click" />
+                <Separator />
+                <MenuItem Header="_Exit" Click="Exit_Click" />
+            </MenuItem>
+        </Menu>
+        <StackPanel Orientation="Vertical" DockPanel.Dock="Bottom">
+            <Grid>
+                <ListView x:Name="LvFoundWords" ItemsSource="{Binding FoundWords, Mode=TwoWay}"
+                      ScrollViewer.VerticalScrollBarVisibility="Visible">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="Auto">
+                                <TextBox x:Name="TxtSyllable" MinWidth="50" DockPanel.Dock="Left" Margin="10,0" Text="{Binding Syllables, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                <TextBlock DockPanel.Dock="Right" Text="{Binding Word}"></TextBlock>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+            <Grid>
+                <TextBlock>
+                <Run Text="Total known syllables: " />
+                <Run Text="{Binding SyllablesCount}" />
+                </TextBlock>
+            </Grid>
+        </StackPanel>
+    </DockPanel>
+</Window>
