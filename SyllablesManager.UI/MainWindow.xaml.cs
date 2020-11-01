@@ -26,6 +26,7 @@ namespace SyllablesManager.UI
         private int _syllablesCount;
         private readonly Dictionary<string, int> _loadedWordsRepetitions = new Dictionary<string, int>();
         private string _logContent;
+        public string WantedFileToLoad = "";
 
         public int SyllablesCount
         {
@@ -75,7 +76,7 @@ namespace SyllablesManager.UI
         {
             InitializeComponent();
             DataContext = this;
-            WriteToLog("Initialized");
+            WriteToLog("Started");
         }
 
         private void LoadKnowSyllablesBtn_Click(object sender, RoutedEventArgs e)
@@ -109,6 +110,11 @@ namespace SyllablesManager.UI
             if (chosenFile == null)
                 return;
 
+            LoadWordsFromFile(chosenFile);
+        }
+
+        private void LoadWordsFromFile(string? chosenFile)
+        {
             var newWords = new List<FoundWordViewItem>();
             if (_unknownSyllablesWords.Count > 0)
             {
@@ -158,7 +164,8 @@ namespace SyllablesManager.UI
 
             if (newWords.Count == 0)
             {
-                GetSyllablesCount_Click(sender, e);
+                WriteToLog("Found no new words");
+                GetSyllablesCount_Click(null, null);
                 return;
             }
 
@@ -189,6 +196,7 @@ namespace SyllablesManager.UI
 
             _knownSyllables.LoadNewSyllablesFromList(_unknownSyllablesWords.ToDictionary(f => f.Word, f => f.Syllables));
             _knownSyllables.SaveToFile();
+            WriteToLog("File was saved successfully");
             _wasSaved = true;
         }
 
@@ -214,6 +222,13 @@ namespace SyllablesManager.UI
 
             SyllablesCount = _unknownSyllablesWords.Sum(f => int.Parse(f.Syllables) * f.Repetitions);
             WriteToLog($"Total syllables: [{SyllablesCount}]");
+
+            SimpleDialog dialog = new SimpleDialog();
+            if (dialog.ShowDialog() == true)
+            {
+                int seconds = int.Parse(dialog.ResponseText);
+                WriteToLog($"Calculation is: [{(double)SyllablesCount / seconds}]");
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -252,6 +267,11 @@ namespace SyllablesManager.UI
                 _knownSyllables.ReadFromFile();
                 KnownSyllablesLoaded = true;
                 WriteToLog($"Known syllables loaded automatically from file [{knownSyllablesFilepath}]");
+            }
+
+            if (KnownSyllablesLoaded && !string.IsNullOrWhiteSpace(WantedFileToLoad))
+            {
+                LoadWordsFromFile(WantedFileToLoad);
             }
         }
 

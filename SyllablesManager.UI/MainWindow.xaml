@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
+        mc:Ignorable="d" WindowStartupLocation="CenterScreen"
         Title="Syllables Calculator" Height="450" Width="800" Loaded="MainWindow_OnLoaded">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
@@ -18,8 +18,9 @@
         </Menu>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"></ColumnDefinition>
-                <ColumnDefinition Width="2*"></ColumnDefinition>
+                <ColumnDefinition Width="6*"></ColumnDefinition>
+                <ColumnDefinition Width="6*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="8*"></RowDefinition>
@@ -34,13 +35,14 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </ScrollViewer>
-            <ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" HorizontalScrollBarVisibility="Auto">
                 <TextBlock Text="{Binding LogContent}"></TextBlock>
             </ScrollViewer>
             <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1">
                 <Run Text="Total known syllables: " />
                 <Run Text="{Binding SyllablesCount}" />
             </TextBlock>
+            <Button Grid.Row="1" Grid.Column="2" Content="Calculate" Click="GetSyllablesCount_Click"></Button>
         </Grid>
     </DockPanel>
 </Window>
