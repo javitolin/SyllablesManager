@@ -4,8 +4,8 @@ using SyllablesManager.Entities;
 using SyllablesManager.UI.Annotations;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -20,10 +20,12 @@ namespace SyllablesManager.UI
         private const string Caption = "Syllables Helper";
         private KnownSyllables _knownSyllables;
         private readonly FileReader _fileReader = new FileReader();
-        private ObservableCollection<FoundWordViewItem> _unknownSyllablesWords = new ObservableCollection<FoundWordViewItem>();
+        private List<FoundWordViewItem> _unknownSyllablesWords = new List<FoundWordViewItem>();
         private bool _knownSyllablesLoaded;
         private bool _wasSaved = false;
         private int _syllablesCount;
+        private readonly Dictionary<string, int> _loadedWordsRepetitions = new Dictionary<string, int>();
+        private string _logContent;
 
         public int SyllablesCount
         {
@@ -36,9 +38,9 @@ namespace SyllablesManager.UI
             }
         }
 
-        public ObservableCollection<FoundWordViewItem> UnknownSyllablesWords
+        public List<FoundWordViewItem> UnknownSyllablesWords
         {
-            get => _unknownSyllablesWords;
+            get => _unknownSyllablesWords.Where(s => s.ShowToUser).OrderBy(s => s.Word).ToList();
             set
             {
                 if (Equals(value, _unknownSyllablesWords)) return;
@@ -58,10 +60,22 @@ namespace SyllablesManager.UI
             }
         }
 
+        public string LogContent
+        {
+            get => _logContent;
+            set
+            {
+                if (value == _logContent) return;
+                _logContent = value;
+                OnPropertyChanged();
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
+            WriteToLog("Initialized");
         }
 
         private void LoadKnowSyllablesBtn_Click(object sender, RoutedEventArgs e)
@@ -75,10 +89,11 @@ namespace SyllablesManager.UI
             {
                 _knownSyllables.ReadFromFile();
                 KnownSyllablesLoaded = true;
+                WriteToLog($"Known syllables loaded from file [{chosenFile}]");
             }
             catch (Exception e1)
             {
-                MessageBox.Show($"There was an error loading file [{chosenFile}]. [{e1}]", Caption);
+                WriteToLog($"There was an error loading file [{chosenFile}]. [{e1}]");
             }
         }
 
@@ -86,7 +101,7 @@ namespace SyllablesManager.UI
         {
             if (_knownSyllables == null)
             {
-                MessageBox.Show("Please load known syllables first");
+                WriteToLog("Please load known syllables first");
                 return;
             }
 
@@ -94,25 +109,50 @@ namespace SyllablesManager.UI
             if (chosenFile == null)
                 return;
 
-            if (UnknownSyllablesWords.Count > 0)
+            var newWords = new List<FoundWordViewItem>();
+            if (_unknownSyllablesWords.Count > 0)
             {
                 var deleteLoadedFiles = MessageBox.Show("Delete loaded files?", Caption, MessageBoxButton.YesNo);
                 if (deleteLoadedFiles == MessageBoxResult.Yes)
-                    UnknownSyllablesWords.Clear();
+                {
+                    _unknownSyllablesWords.Clear();
+                }
+                else
+                {
+                    newWords.AddRange(_unknownSyllablesWords);
+                }
             }
 
-            var newWords = new List<FoundWordViewItem>();
             var wordsFromFile = _fileReader.GetWordsFromFile(chosenFile);
+
             foreach (var wordFromFile in wordsFromFile)
             {
-                var syllables = _knownSyllables.GetSyllablesForWord(wordFromFile);
+                if (!_loadedWordsRepetitions.ContainsKey(wordFromFile))
+                {
+                    _loadedWordsRepetitions.Add(wordFromFile, 1);
+                }
+                else
+                {
+                    _loadedWordsRepetitions[wordFromFile]++;
+                }
+            }
+
+            foreach (var loadedWordsRepetition in _loadedWordsRepetitions)
+            {
+                var currentWord = loadedWordsRepetition.Key;
+                var repetitions = loadedWordsRepetition.Value;
+                var syllables = _knownSyllables.GetSyllablesForWord(currentWord);
+                FoundWordViewItem foundWord = null;
                 if (syllables != KnownSyllables.NotKnown)
                 {
-                    SyllablesCount += int.Parse(syllables);
-                    continue;
+                    foundWord = new FoundWordViewItem(currentWord, syllables, false, repetitions);
+                    WriteToLog($"Word [{currentWord}] is already known. It has [{syllables}] syllables. It appears [{repetitions}] times in the text");
+                }
+                else
+                {
+                    foundWord = new FoundWordViewItem(currentWord, KnownSyllables.NotKnown, true, repetitions);
                 }
 
-                var foundWord = new FoundWordViewItem(wordFromFile, "" + syllables);
                 newWords.Add(foundWord);
             }
 
@@ -122,8 +162,11 @@ namespace SyllablesManager.UI
                 return;
             }
 
-            newWords.ForEach(UnknownSyllablesWords.Add);
-            OnPropertyChanged(nameof(UnknownSyllablesWords));
+            WriteToLog("Input text loaded");
+
+            UnknownSyllablesWords = newWords;
+            var knownSyllablesSum = _unknownSyllablesWords.Where(f => f.ShowToUser == false).Sum(f => int.Parse(f.Syllables) * f.Repetitions);
+            WriteToLog($"Known syllables are: [{knownSyllablesSum}]");
         }
 
         private string? GetFileFromUser()
@@ -140,11 +183,11 @@ namespace SyllablesManager.UI
         {
             if (_knownSyllables == null)
             {
-                MessageBox.Show("Please load known syllables first");
+                WriteToLog("Please load known syllables first");
                 return;
             }
 
-            _knownSyllables.LoadNewSyllablesFromList(UnknownSyllablesWords.ToDictionary(f => f.Word, f => f.Syllables));
+            _knownSyllables.LoadNewSyllablesFromList(_unknownSyllablesWords.ToDictionary(f => f.Word, f => f.Syllables));
             _knownSyllables.SaveToFile();
             _wasSaved = true;
         }
@@ -153,25 +196,24 @@ namespace SyllablesManager.UI
         {
             if (_knownSyllables == null)
             {
-                MessageBox.Show("Please load known syllables first", Caption);
+                WriteToLog("Please load known syllables first");
                 return;
             }
 
-            if (UnknownSyllablesWords.Count == 0)
+            if (_unknownSyllablesWords.Count == 0)
             {
-                MessageBox.Show("Please load a text file first", Caption);
+                WriteToLog("Please load a text file first");
                 return;
             }
 
-            if (UnknownSyllablesWords.Any(f => f.Syllables == KnownSyllables.NotKnown))
+            if (_unknownSyllablesWords.Any(f => f.Syllables == KnownSyllables.NotKnown))
             {
-                MessageBox.Show("There are words without syllable number", Caption);
+                WriteToLog("There are words without syllable number");
                 return;
             }
 
-            int totalSyllables = UnknownSyllablesWords.Sum(f => int.Parse(f.Syllables));
-            SyllablesCount += totalSyllables;
-            MessageBox.Show($"Total syllables: [{SyllablesCount}]");
+            SyllablesCount = _unknownSyllablesWords.Sum(f => int.Parse(f.Syllables) * f.Repetitions);
+            WriteToLog($"Total syllables: [{SyllablesCount}]");
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -199,6 +241,23 @@ namespace SyllablesManager.UI
             }
 
             base.OnClosing(e);
+        }
+
+        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            string knownSyllablesFilepath = "KnownSyllables.txt";
+            if (File.Exists(knownSyllablesFilepath))
+            {
+                _knownSyllables = new KnownSyllables(knownSyllablesFilepath);
+                _knownSyllables.ReadFromFile();
+                KnownSyllablesLoaded = true;
+                WriteToLog($"Known syllables loaded automatically from file [{knownSyllablesFilepath}]");
+            }
+        }
+
+        private void WriteToLog(string message)
+        {
+            LogContent += message + Environment.NewLine;
         }
     }
 }

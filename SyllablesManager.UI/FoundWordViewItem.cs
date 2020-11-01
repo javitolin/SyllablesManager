@@ -8,6 +8,8 @@ namespace SyllablesManager.UI
     {
         private string _word;
         private string _syllables;
+        private bool _showToUser;
+        private int _repetitions;
 
         public string Word
         {
@@ -31,10 +33,34 @@ namespace SyllablesManager.UI
             }
         }
 
-        public FoundWordViewItem(string word, string syllables)
+        public bool ShowToUser
+        {
+            get => _showToUser;
+            set
+            {
+                if (value == _showToUser) return;
+                _showToUser = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int Repetitions
+        {
+            get => _repetitions;
+            set
+            {
+                if (value == _repetitions) return;
+                _repetitions = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public FoundWordViewItem(string word, string syllables, bool showToUser, int repetitions)
         {
             Word = word;
             Syllables = syllables;
+            ShowToUser = showToUser;
+            Repetitions = repetitions;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
