@@ -21,9 +21,11 @@
                 <ColumnDefinition Width="6*"></ColumnDefinition>
                 <ColumnDefinition Width="6*"></ColumnDefinition>
                 <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="8*"></RowDefinition>
+                <RowDefinition Height="1*"></RowDefinition>
                 <RowDefinition Height="1*"></RowDefinition>
             </Grid.RowDefinitions>
             <ScrollViewer Grid.Column="0" Grid.Row="0" HorizontalScrollBarVisibility="Auto">
@@ -35,14 +37,16 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </ScrollViewer>
-            <ScrollViewer Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" HorizontalScrollBarVisibility="Auto">
-                <TextBlock Text="{Binding LogContent}"></TextBlock>
+            <ScrollViewer x:Name="LogScrollViewer" Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="0" HorizontalScrollBarVisibility="Auto">
+                <TextBox x:Name="LogTxtBlock" Text="{Binding LogContent}"></TextBox>
             </ScrollViewer>
             <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1">
                 <Run Text="Total known syllables: " />
                 <Run Text="{Binding SyllablesCount}" />
             </TextBlock>
-            <Button Grid.Row="1" Grid.Column="2" Content="Calculate" Click="GetSyllablesCount_Click"></Button>
+            <TextBox x:Name="InputTimeTxt" Grid.Row="1" Grid.Column="2" Text="Time?" VerticalAlignment="Center"></TextBox>
+            <Button x:Name="CalculateWithTimeBtn" Grid.Row="1" Grid.Column="3" Content="Calculate" Click="CalculateWithTimeBtn_OnClick"></Button>
+            <Button Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Content="Calculate" Click="GetSyllablesCount_Click"></Button>
         </Grid>
     </DockPanel>
 </Window>

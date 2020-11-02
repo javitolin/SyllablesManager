@@ -40,8 +40,11 @@ namespace SyllablesManager.Entities
             }
         }
 
-        public void LoadNewSyllablesFromList(Dictionary<string, string> newSyllables)
+        private void LoadNewSyllablesFromList(Dictionary<string, string> newSyllables)
         {
+            if (newSyllables == null)
+                return;
+
             foreach (var newSyllable in newSyllables)
             {
                 if (_knownSyllablesDictionary.ContainsKey(newSyllable.Key))
@@ -54,8 +57,10 @@ namespace SyllablesManager.Entities
             }
         }
 
-        public void SaveToFile()
+        public void SaveToFile(Dictionary<string, string> newSyllables = null)
         {
+            LoadNewSyllablesFromList(newSyllables);
+
             StringBuilder toFile = new StringBuilder();
             foreach (KeyValuePair<string, string> keyValuePair in _knownSyllablesDictionary)
             {

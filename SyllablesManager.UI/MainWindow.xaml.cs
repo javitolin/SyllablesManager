@@ -194,41 +194,43 @@ namespace SyllablesManager.UI
                 return;
             }
 
-            _knownSyllables.LoadNewSyllablesFromList(_unknownSyllablesWords.ToDictionary(f => f.Word, f => f.Syllables));
-            _knownSyllables.SaveToFile();
+            _knownSyllables.SaveToFile(_unknownSyllablesWords
+                .Where(f => f.Syllables != KnownSyllables.NotKnown)
+                .ToDictionary(f => f.Word, f => f.Syllables));
+
             WriteToLog("File was saved successfully");
             _wasSaved = true;
         }
 
-        private void GetSyllablesCount_Click(object sender, RoutedEventArgs e)
+        private bool CheckInput()
         {
             if (_knownSyllables == null)
             {
                 WriteToLog("Please load known syllables first");
-                return;
+                return false;
             }
 
             if (_unknownSyllablesWords.Count == 0)
             {
                 WriteToLog("Please load a text file first");
-                return;
+                return false;
             }
 
             if (_unknownSyllablesWords.Any(f => f.Syllables == KnownSyllables.NotKnown))
             {
                 WriteToLog("There are words without syllable number");
-                return;
+                return false;
             }
+
+            return true;
+        }
+        private void GetSyllablesCount_Click(object sender, RoutedEventArgs e)
+        {
+            if (!CheckInput())
+                return;
 
             SyllablesCount = _unknownSyllablesWords.Sum(f => int.Parse(f.Syllables) * f.Repetitions);
             WriteToLog($"Total syllables: [{SyllablesCount}]");
-
-            SimpleDialog dialog = new SimpleDialog();
-            if (dialog.ShowDialog() == true)
-            {
-                int seconds = int.Parse(dialog.ResponseText);
-                WriteToLog($"Calculation is: [{(double)SyllablesCount / seconds}]");
-            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -246,12 +248,12 @@ namespace SyllablesManager.UI
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            if (!_wasSaved)
+            if (!_wasSaved && _knownSyllables != null)
             {
-                var userAnswer = MessageBox.Show("Forgot to save?", Caption, MessageBoxButton.YesNo);
+                var userAnswer = MessageBox.Show("Save before closing?", Caption, MessageBoxButton.YesNo);
                 if (userAnswer == MessageBoxResult.Yes)
                 {
-                    e.Cancel = true;
+                    SaveLoaded_Click(null, null);
                 }
             }
 
@@ -278,6 +280,24 @@ namespace SyllablesManager.UI
         private void WriteToLog(string message)
         {
             LogContent += message + Environment.NewLine;
+            LogScrollViewer.ScrollToEnd();
+        }
+
+        private void CalculateWithTimeBtn_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (!CheckInput())
+                return;
+
+            SyllablesCount = _unknownSyllablesWords.Sum(f => int.Parse(f.Syllables) * f.Repetitions);
+            WriteToLog($"Total syllables: [{SyllablesCount}]");
+
+            if (!int.TryParse(InputTimeTxt.Text, out var seconds))
+            {
+                MessageBox.Show($"Wrong number of seconds: [{InputTimeTxt.Text}]", Caption);
+                return;
+            }
+
+            WriteToLog($"Calculation is: [{(double)SyllablesCount / seconds}]");
         }
     }
 }
