@@ -115,21 +115,28 @@ namespace SyllablesManager.UI
 
         private void LoadWordsFromFile(string? chosenFile)
         {
+            var wordsFromFile = _fileReader.GetWordsFromFile(chosenFile);
+            AddWords(wordsFromFile);
+        }
+
+        private void AddWords(IEnumerable<string> wordsFromFile)
+        {
             var newWords = new List<FoundWordViewItem>();
+
             if (_unknownSyllablesWords.Count > 0)
             {
                 var deleteLoadedFiles = MessageBox.Show("Delete loaded files?", Caption, MessageBoxButton.YesNo);
                 if (deleteLoadedFiles == MessageBoxResult.Yes)
                 {
                     _unknownSyllablesWords.Clear();
+                    _loadedWordsRepetitions.Clear();
                 }
                 else
                 {
+                    _unknownSyllablesWords.Clear();
                     newWords.AddRange(_unknownSyllablesWords);
                 }
             }
-
-            var wordsFromFile = _fileReader.GetWordsFromFile(chosenFile);
 
             foreach (var wordFromFile in wordsFromFile)
             {
@@ -298,6 +305,13 @@ namespace SyllablesManager.UI
             }
 
             WriteToLog($"Calculation is: [{(double)SyllablesCount / seconds}]");
+        }
+
+        private void UseCopiedText_OnClick(object sender, RoutedEventArgs e)
+        {
+            var text = Clipboard.GetText();
+            var words = _fileReader.GetWordsFromText(text);
+            AddWords(words);
         }
     }
 }

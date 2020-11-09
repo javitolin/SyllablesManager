@@ -10,6 +10,7 @@
             <MenuItem Header="_File">
                 <MenuItem Header="_Load Known Syllables" Click="LoadKnowSyllablesBtn_Click" />
                 <MenuItem IsEnabled="{Binding KnownSyllablesLoaded}" Header="_Open Input Text" Click="LoadTextBtn_Click" />
+                <MenuItem IsEnabled="{Binding KnownSyllablesLoaded}" Header="_Used Copied Text" Click="UseCopiedText_OnClick" />
                 <MenuItem IsEnabled="{Binding KnownSyllablesLoaded}" Header="_Calculate Syllables Count" Click="GetSyllablesCount_Click" />
                 <MenuItem IsEnabled="{Binding KnownSyllablesLoaded}" Header="_Save Known Syllables" Click="SaveLoaded_Click" />
                 <Separator />

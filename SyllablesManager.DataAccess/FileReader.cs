@@ -27,6 +27,20 @@ namespace SyllablesManager.DataAccess
             }
         }
 
+        public IEnumerable<string> GetWordsFromText(string text)
+        {
+            text = text.Replace(Environment.NewLine, "");
+            var words = text.Split(' ');
+            foreach (var word in words)
+            {
+                var currentWord = RemoveSpecialCharacters(word).Trim();
+                if (string.IsNullOrWhiteSpace(currentWord))
+                    continue;
+
+                yield return currentWord;
+            }
+        }
+
         private string RemoveSpecialCharacters(string str)
         {
             return Regex.Replace(str, "[^a-zA-Zא-ת]+", "", RegexOptions.Compiled);
